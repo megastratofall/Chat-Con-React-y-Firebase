@@ -1,0 +1,9 @@
+.sidebar{
+border: 2px solid rgb(247, 231, 162);
+border-radius:1rem ;
+margin-top:1rem;
+margin-right: 1rem;
+padding: 1rem;
+transform: translateX(-205px);
+}
+
