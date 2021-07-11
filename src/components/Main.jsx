@@ -1,19 +1,43 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./Main.css";
 import Post from "./Post.jsx";
 import TextField from "@material-ui/core/TextField";
+import { db } from "../firebase";
+import firebase from "firebase";
+import FlipMove from "react-flip-move";
+import { useStateValue } from "../Stateprovider";
+
 
 const Main = () => {
+  const [{ user }, dispatch] = useStateValue();
   const [posts, setPosts] = useState([]);
   const [input, setInput] = useState({
     title: "",
     text: "",
   });
 
+  useEffect(() => {
+    db.collection("posts").orderBy("timestamp", "desc").onSnapshot((snapshot) =>
+      setPosts(
+        snapshot.docs.map((doc) => ({
+          id: doc.id,
+          data: doc.data(),
+        }))
+      )
+    );
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (input.title && input.text) {
-      setPosts([input, ...posts]);
+    if (input.text) {
+      db.collection("posts").add({
+        title: input.title,
+        text: input.text,
+        username: user?.displayName,
+        avatar: user?.photoURL,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        isBlue: false, 
+      });
       setInput({
         title: "",
         text: "",
@@ -44,14 +68,16 @@ const Main = () => {
               value={input.text}
               onChange={(e) => setInput({ ...input, text: e.target.value })}
             />
-            <button type="submit" onClick={handleSubmit}></button>
+            <button className="button" type="submit" onClick={handleSubmit}></button>
           </div>
         </form>
       </div>
       <div className="main__posts">
-        {posts.map(({ title, text }) => (
-          <Post title={title} text={text} />
+      <FlipMove>
+        {posts.map(({ id, data: { title, text, isBlue, username, avatar } }) => (
+          <Post key={id} id={id} title={title} text={text} isBlue={isBlue} username={username} avatar={avatar}/>
         ))}
+        </FlipMove> 
       </div>
     </div>
   );

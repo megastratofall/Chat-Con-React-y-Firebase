@@ -7,9 +7,16 @@ import { useStateValue } from "./Stateprovider";
 import { useEffect } from "react";
 import { auth } from "./firebase";
 import { actionTypes } from "./reducer";
+import { createMuiTheme, CssBaseline, ThemeProvider } from "@material-ui/core";
 
 function App() {
-  const [{ isopen, user }, dispatch] = useStateValue();
+  const [{ isopen, user, darkMode }, dispatch] = useStateValue();
+
+  const theme = createMuiTheme({
+    palette: {
+      type: darkMode ? "dark" : "light",
+    },
+  });
 
   //useEffect admite 2 parámetros, funcion flecha + array, cada vez q se refresque se va a ejecutar la funcion
   useEffect(() => {
@@ -25,16 +32,23 @@ function App() {
   }, []);
   return (
     <div className="app">
-      <Header />
       {!user ? (
-        <Login />
+        <>
+          <Header />
+          <Login />
+        </>
       ) : (
-        <div className={`app__central ${isopen ? "displayed" : ""}`}>
-          <Sidebar />
-          <Main />
-        </div>
+        <>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Header />
+            <div className={`app__central ${isopen ? "displayed" : ""}`}>
+              <Sidebar />
+              <Main />
+            </div>
+          </ThemeProvider>
+        </>
       )}
-      <Login />
     </div>
   );
 }
